@@ -15,9 +15,9 @@ class SocialMediaPlatform(models.Model):
 
 class Author(models.Model):
     username = models.CharField(max_length=255)
-    unique_id = models.IntegerField()
-    unique_uuid = models.CharField(max_length=36)
-    origin_unique_id = models.CharField(max_length=255)
+    unique_id = models.IntegerField(default=0)
+    unique_uuid = models.CharField(max_length=36, null=True, blank=True)
+    origin_unique_id = models.CharField(max_length=255, null=True, blank=True)
 
 
 class AuthorSocialPlatform(models.Model):
@@ -40,25 +40,25 @@ class AuthorSocialMediaContent(models.Model):
     author = models.ForeignKey(
         Author, on_delete=models.CASCADE, related_name="social_media_contents"
     )
-    unique_id = models.IntegerField()
-    unique_uuid = models.CharField(max_length=36)
-    origin_unique_id = models.CharField(max_length=255)
-    creation_info_created_at = models.DateTimeField()
+    unique_id = models.IntegerField(default=0)
+    unique_uuid = models.CharField(max_length=36, null=True, blank=True)
+    origin_unique_id = models.CharField(max_length=255, null=True, blank=True)
+    creation_info_created_at = models.DateTimeField(null=True, blank=True)
     creation_info_timestamp = models.DateTimeField()
-    main_text = models.TextField()
-    token_count = models.IntegerField()
-    char_count = models.IntegerField()
-    tag_count = models.IntegerField()
+    main_text = models.TextField(null=True, blank=True)
+    token_count = models.IntegerField(default=0)
+    char_count = models.IntegerField(default=0)
+    tag_count = models.IntegerField(default=0)
     origin_platform = models.ForeignKey(
         SocialMediaPlatform,
         on_delete=models.CASCADE,
         related_name="content_origin_platforms",
     )
-    origin_url = models.URLField()
+    origin_url = models.TextField()
 
 
 class AuthorSocialMediaContentMedia(models.Model):
-    media_url = models.URLField()
+    media_url = models.TextField()
     media_type = models.CharField(max_length=50)
     author = models.ForeignKey(
         Author, on_delete=models.CASCADE, related_name="media_contents"

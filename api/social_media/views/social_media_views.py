@@ -68,6 +68,7 @@ class MergedContentView(ModelViewSet):
             merged_data = []
             for content_data in serializer.data:
                 author_data = Author.objects.filter(id=content_data['author']).values()
+
                 if author_data:
                     stats_data = AuthorSocialMediaStats.objects.filter(content_id=content_data['id']).values().first()
 
@@ -76,8 +77,8 @@ class MergedContentView(ModelViewSet):
                         id=content_data['origin_platform']).values().first()
 
                     merged_data.append({
-                        'content_data': content_data,
-                        'author_details': author_data[0],
+                        'content': content_data,
+                        'creator': author_data[0],
                         'stats_data': stats_data,
                         'platform_data': platform_data,
                     })
