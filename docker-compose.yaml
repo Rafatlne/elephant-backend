@@ -1,0 +1,73 @@
+version: "3.1"
+
+services:
+    backend:
+        restart: unless-stopped
+        container_name: elephant-oj-backend
+
+        build:
+            context: .
+            dockerfile: ./api/Dockerfile
+
+        volumes:
+            - static_volume:/app/api/django_static/
+            - type: bind
+              source: ${MEDIA_VOLUME:-$MEDIA_ROOT}
+              target: ${MEDIA_ROOT}
+
+        ports:
+            - ${PORT:-8000}:8000
+
+        depends_on:
+            - db
+
+    async:
+        restart: unless-stopped
+        container_name: elephant-oj-async
+        build:
+            context: .
+            dockerfile: ./api/Dockerfile
+        volumes:
+            - static_volume:/app/api/django_static/
+        depends_on:
+            - db
+            - redis
+        entrypoint: python manage.py rqworker --with-scheduler
+
+    redis:
+        image: redis:latest
+        restart: unless-stopped
+        container_name: elephant-redis
+
+        ports:
+            - 6379:6379
+
+        volumes:
+            - redis_volume:/data
+
+    db:
+        restart: unless-stopped
+        image: postgres:13-alpine
+        container_name: elephant-oj-db
+        expose:
+            - 5432
+
+        environment:
+            - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+            - POSTGRES_USER=postgres
+            - APP_DB_NAME=${DATABASE_NAME}
+            - APP_DB_USER=${DATABASE_OWNER}
+            - APP_DB_PASS=${DATABASE_PASSWORD}
+
+        volumes:
+            - type: bind
+              source: ./db
+              target: /docker-entrypoint-initdb.d/
+
+            - type: bind
+              source: ${DATABASE_DATA_VOLUME:-./db/data}
+              target: /var/lib/postgresql/data
+
+volumes:
+    static_volume: {}
+    redis_volume: {}

@@ -1,0 +1,26 @@
+FROM python:3.10-slim-buster
+
+RUN apt update && apt install -y supervisor
+
+WORKDIR /app
+
+RUN pip install --upgrade pip
+
+COPY ./requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+
+COPY ./start_rq_worker.sh .
+RUN chmod +x ./start_rq_worker.sh
+
+
+RUN mkdir -p /app/media/
+
+VOLUME ["/app/media/"]
+VOLUME ["/app/api/django_static/"]
+
+COPY . .
+
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
